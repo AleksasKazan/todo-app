@@ -14,7 +14,6 @@
     <None Remove="Models\" />
     <None Remove="Models\ReadModels\" />
     <None Remove="Swashbuckle.AspNetCore.Newtonsoft" />
-    <None Remove="Models\WriteModels\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
@@ -25,6 +24,5 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Models\ReadModels\" />
-    <Folder Include="Models\WriteModels\" />
   </ItemGroup>
 </Project>
