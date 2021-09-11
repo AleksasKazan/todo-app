@@ -15,6 +15,6 @@ namespace TodoApp.Models.ResponseModels
 
         public DateTime DateCreated { get; set; }
 
-        public bool IsComplete { get; set; }
+        public bool IsCompleted { get; set; }
     }
 }

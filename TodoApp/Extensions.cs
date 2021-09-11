@@ -1,11 +1,11 @@
-﻿using Persistence.Models.WriteModels;
+﻿using Persistence.Models.ReadModels;
 using TodoApp.Models.ResponseModels;
 
 namespace TodoApp
 {
     public static class Extensions
     {
-        public static TodoItemResponse MapToTodoItemResponse(this TodoItemWriteModel todoItem)
+        public static TodoItemResponse MapToTodoItemResponse(this TodoItemReadModel todoItem)
         {
             return new TodoItemResponse
             {
@@ -14,7 +14,7 @@ namespace TodoApp
                 Description = todoItem.Description,
                 Difficulty = todoItem.Difficulty,
                 DateCreated = todoItem.DateCreated,
-                IsComplete = todoItem.IsComplete
+                IsCompleted = todoItem.IsCompleted
             };
         }
     }

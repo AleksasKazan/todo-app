@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Persistence.Models.ReadModels;
-using Persistence.Models.WriteModels;
 
 namespace Persistence
 {
@@ -18,25 +17,24 @@ namespace Persistence
 
         public Task<IEnumerable<TodoItemReadModel>> GetAll()
         {
-            var sql = @$"SELECT Id, Title, Description, Difficulty, DateCreated, IsComplete FROM {TodosTable}";
+            var sql = $"SELECT * FROM {TodosTable}";
             return _sqlClient.QueryAsync<TodoItemReadModel>(sql);
         }
 
         public Task<TodoItemReadModel> Get(Guid id)
         {
-            var sql = @$"SELECT Id, Title, Description, Difficulty, DateCreated, IsComplete FROM {TodosTable}
-                        WHERE Id = @Id";
+            var sql = $"SELECT * FROM {TodosTable} WHERE Id = @Id";
             return _sqlClient.QuerySingleOrDefaultAsync<TodoItemReadModel>(sql, new
             {
                 Id = id
             });
         }
 
-        public Task<int> SaveOrUpdate(TodoItemWriteModel todoItem)
+        public Task<int> SaveOrUpdate(TodoItemReadModel todoItem)
         {
-            var sql = @$"INSERT INTO {TodosTable} (Id, Title, Description, Difficulty, DateCreated, IsComplete)
-                        VALUES(@Id, @Title, @Description, @Difficulty, @DateCreated, @IsComplete)
-                        ON DUPLICATE KEY UPDATE Title = @Title, Description = @Description, Difficulty = @Difficulty, IsComplete = @IsComplete";
+            var sql = @$"INSERT INTO {TodosTable} (Id, Title, Description, Difficulty, DateCreated, IsCompleted)
+                        VALUES(@Id, @Title, @Description, @Difficulty, @DateCreated, @IsCompleted)
+                        ON DUPLICATE KEY UPDATE Title = @Title, Description = @Description, Difficulty = @Difficulty, IsCompleted = @IsCompleted";
 
             return _sqlClient.ExecuteAsync(sql, new
             {
@@ -45,13 +43,13 @@ namespace Persistence
                 todoItem.Description,
                 Difficulty = todoItem.Difficulty.ToString(),
                 todoItem.DateCreated,
-                todoItem.IsComplete
+                todoItem.IsCompleted
             });
         }
 
         public Task<int> Delete(Guid id)
         {
-            var sql = @$"DELETE FROM {TodosTable} WHERE Id = @Id";
+            var sql = $"DELETE FROM {TodosTable} WHERE Id = @Id";
 
             return _sqlClient.ExecuteAsync(sql, new
             {
