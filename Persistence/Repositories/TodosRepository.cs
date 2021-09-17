@@ -32,9 +32,9 @@ namespace Persistence
 
         public Task<int> SaveOrUpdate(TodoItemReadModel todoItem)
         {
-            var sql = @$"INSERT INTO {TodosTable} (Id, Title, Description, Difficulty, DateCreated, IsCompleted)
-                        VALUES(@Id, @Title, @Description, @Difficulty, @DateCreated, @IsCompleted)
-                        ON DUPLICATE KEY UPDATE Title = @Title, Description = @Description, Difficulty = @Difficulty, IsCompleted = @IsCompleted";
+            var sql = @$"INSERT INTO {TodosTable} (Id, Title, Description, Difficulty, DateCreated, IsCompleted, UserId)
+                        VALUES(@Id, @Title, @Description, @Difficulty, @DateCreated, @IsCompleted, @UserId)
+                        ON DUPLICATE KEY UPDATE Title = @Title, Description = @Description, Difficulty = @Difficulty, IsCompleted = @IsCompleted, UserId = @UserId";
 
             return _sqlClient.ExecuteAsync(sql, new
             {
@@ -43,7 +43,8 @@ namespace Persistence
                 todoItem.Description,
                 Difficulty = todoItem.Difficulty.ToString(),
                 todoItem.DateCreated,
-                todoItem.IsCompleted
+                todoItem.IsCompleted,
+                todoItem.UserId
             });
         }
 

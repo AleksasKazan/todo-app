@@ -17,6 +17,9 @@
     <None Remove="Models\" />
     <None Remove="Models\ResponseModels\" />
     <None Remove="Models\RequestModels\" />
+    <None Remove="Options\" />
+    <None Remove="Attributes\" />
+    <None Remove="SwaggerSettings\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
@@ -25,5 +28,8 @@
     <Folder Include="Models\" />
     <Folder Include="Models\ResponseModels\" />
     <Folder Include="Models\RequestModels\" />
+    <Folder Include="Options\" />
+    <Folder Include="Attributes\" />
+    <Folder Include="SwaggerSettings\" />
   </ItemGroup>
 </Project>

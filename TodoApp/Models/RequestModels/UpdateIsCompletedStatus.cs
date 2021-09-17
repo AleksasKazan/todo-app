@@ -3,6 +3,6 @@ namespace TodoApp.Models.RequestModels
 {
     public class UpdateIsCompletedStatus
     {
-        public bool IsCompleted { get; set; }
+        //public bool IsCompleted { get; set; }
     }
 }

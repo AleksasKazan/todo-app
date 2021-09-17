@@ -14,7 +14,31 @@ namespace TodoApp
                 Description = todoItem.Description,
                 Difficulty = todoItem.Difficulty,
                 DateCreated = todoItem.DateCreated,
-                IsCompleted = todoItem.IsCompleted
+                IsCompleted = todoItem.IsCompleted,
+                UserId = todoItem.UserId
+            };
+        }
+
+        public static UserResponseModel MapToUserResponse(this UserReadModel user)
+        {
+            return new UserResponseModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Password = user.Password,
+                DateCreated = user.DateCreated
+            };
+        }
+
+        public static ApiKeyResponseModel MapToApiKeyResponse(this ApiKeyReadModel apiKey)
+        {
+            return new ApiKeyResponseModel
+            {
+                Id = apiKey.Id,
+                ApiKey = apiKey.ApiKey,
+                UserId = apiKey.UserId,
+                IsActive = apiKey.IsActive,
+                DateCreated = apiKey.DateCreated
             };
         }
     }

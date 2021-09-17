@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Persistence;
+using TodoApp.Options;
+using TodoApp.SwaggerSettings;
 
 namespace TodoApp
 {
@@ -21,6 +23,8 @@ namespace TodoApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
 
             services.AddControllers().AddJsonOptions(options =>
             {
@@ -28,11 +32,14 @@ namespace TodoApp
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "RestAPI", Version = "v1" }); });
+            services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "RestAPI", Version = "v1" });
+                c.OperationFilter<AddHeaderParameter>();
+            });
 
             //services.AddSingleton<ITodosRepository, TodosRepository>();
 
-            services.AddPersistence();
+            services.AddPersistence(Configuration);
 
             services.AddCors();
         }

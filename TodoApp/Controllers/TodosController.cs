@@ -7,25 +7,39 @@ using Persistence;
 using Persistence.Models.ReadModels;
 using TodoApp.Models.RequestModels;
 using System.Linq;
+using TodoApp.Options;
+using Microsoft.Extensions.Options;
+using TodoApp.Attributes;
+using Persistence.Repositories;
 
 namespace TodoApp.Controllers
 {
     [ApiController]
+    //[ReleaseDate]
+    [ApiKey]
     public class TodosController : ControllerBase
     {
         private readonly ITodosRepository _todosRepository;
-        public TodosController(ITodosRepository todosRepository)
+        private readonly IUsersRepository _usersRepository;
+        private readonly AppSettings _appSettings;
+        public TodosController(ITodosRepository todosRepository,IUsersRepository usersRepository , IOptions<AppSettings>appSettings)
         {
             _todosRepository = todosRepository;
+            _usersRepository = usersRepository;
+            _appSettings = appSettings.Value;
         }
 
         [HttpGet]
         [Route("todos")]
-        public async Task<IEnumerable<TodoItemResponse>> GetTodos()
+        public async Task<ActionResult<IEnumerable<TodoItemResponse>>> GetTodos()
         {
+            //if (_appSettings.ReleaseDate >= DateTime.Now)
+            //{
+            //    return BadRequest("Feature not released");
+            //}
             var todos = await _todosRepository.GetAll();
 
-            return todos.Select(todoItem => todoItem.MapToTodoItemResponse());
+            return new ActionResult<IEnumerable<TodoItemResponse>> (todos.Select(todoItem => todoItem.MapToTodoItemResponse()));
         }
 
         [HttpGet]
@@ -46,6 +60,8 @@ namespace TodoApp.Controllers
         [Route("todos")]
         public async Task<ActionResult<TodoItemResponse>> AddTodo([FromBody] SaveTodoItemRequest request)
         {
+            var userId = (Guid)HttpContext.Items["userId"];
+
             var todoItem = new TodoItemReadModel
             {
                 Id = Guid.NewGuid(),
@@ -53,7 +69,8 @@ namespace TodoApp.Controllers
                 Description = request.Description,
                 Difficulty = request.Difficulty,
                 DateCreated = DateTime.Now,
-                IsCompleted = false
+                IsCompleted = false,
+                UserId = userId
             };
             await _todosRepository.SaveOrUpdate(todoItem);
 
@@ -85,26 +102,12 @@ namespace TodoApp.Controllers
         [Route("todos/{id}/status")]
         public async Task<ActionResult<TodoItemResponse>> UpdateTodoStatus([FromBody] UpdateIsCompletedStatus request, Guid id)
         {
-            if (request is null)
-            {
-                return BadRequest();
-            }
-            var alreadyExiststodoItem = await _todosRepository.Get(id);
-            if (alreadyExiststodoItem is null)
-            {
-                return NotFound($"Todo item with id: '{id}' does not exist");
-            }
-            if (alreadyExiststodoItem.IsCompleted)
-            {
-                alreadyExiststodoItem.IsCompleted = false;
-            }
-            else
-            {
-                alreadyExiststodoItem.IsCompleted = true;
-            }
+            var todoItem = await _todosRepository.Get(id);
 
-            await _todosRepository.SaveOrUpdate(alreadyExiststodoItem);
-            return alreadyExiststodoItem.MapToTodoItemResponse();
+            todoItem.IsCompleted = !todoItem.IsCompleted;
+
+            await _todosRepository.SaveOrUpdate(todoItem);
+            return todoItem.MapToTodoItemResponse();
         }
 
         [HttpDelete]
