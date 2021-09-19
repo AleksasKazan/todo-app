@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Persistence.Models.ReadModels;
 
-namespace Persistence
+namespace Persistence.Repositories
 {
     public interface ITodosRepository
     {

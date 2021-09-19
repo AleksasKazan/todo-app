@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Persistence.Models.ReadModels;
 using Persistence.Repositories;
+using TodoApp.Attributes;
 using TodoApp.Models.RequestModels;
 using TodoApp.Models.ResponseModels;
 using TodoApp.Options;
@@ -75,8 +76,13 @@ namespace TodoApp.Controllers
 
         [HttpPost]
         [Route("users/signUp")]
-        public async Task<ActionResult<IEnumerable<UserResponseModel>>> SignUp([FromBody] SaveUserRequest request)
+        public async Task<ActionResult<UserResponseModel>> SignUp([FromBody] SaveUserRequest request)
         {
+            var checkUser = await _usersRepository.GetUserByName(request.UserName);
+            if (checkUser is not null)
+            {
+                return BadRequest($"User with UserName {request.UserName} already exists");
+            }
             //var userId = (Guid)HttpContext.Items["userId"];
             var user = new UserReadModel
             {
@@ -94,18 +100,48 @@ namespace TodoApp.Controllers
         [Route("users/apiKey")]
         public async Task<ActionResult<ApiKeyResponseModel>> GenerateApiKey([FromBody] SaveApiKeyRequest request)
         {
-            var user = await _usersRepository.GetUser(request.UserName, request.Password);
+            var user = await _usersRepository.GetUserByName(request.UserName);
+            if (user is null)
+            {
+                return NotFound($"User with UserName: {request.UserName} does not exists");
+            }
+
+            if (!user.Password.Equals(request.Password))
+            {
+                return BadRequest($"Wrong user {request.UserName} password ");
+            }
+
+            var apiKeys = await _usersRepository.GetAllApiKeys(user.Id);
+            
+            if (apiKeys.Count()>2)
+            {
+                return new BadRequestObjectResult($"You have reached maximum allowed {apiKeys.Count()} ApiKeys already");
+            }
+
             var apiKey = new ApiKeyReadModel
             {
                 Id = Guid.NewGuid(),
                 ApiKey = Guid.NewGuid().ToString("N"),
                 UserId = user.Id,
                 IsActive = true,
-                DateCreated = DateTime.Now
+                DateCreated = DateTime.Now,
+                ExpirationDate = DateTime.Now.AddMinutes(10)
             };
             await _usersRepository.CreateApiKey(apiKey);
 
             return CreatedAtAction("GetApiKeysByUserId", new { user.Id }, apiKey.MapToApiKeyResponse());
+        }
+        //[ApiKey]
+        [HttpPut]
+        [Route("users/{apiKeyId}/toggleStatus")]
+        public async Task<ActionResult<ApiKeyResponseModel>> ToggleStatus(Guid apiKeyId)
+        {
+            var apiKeyObj = await _usersRepository.GetApiKeyByApiKeyId(apiKeyId);
+
+            apiKeyObj.IsActive = !apiKeyObj.IsActive;
+
+            await _usersRepository.CreateApiKey(apiKeyObj);
+            return apiKeyObj.MapToApiKeyResponse();
         }
     }
 }

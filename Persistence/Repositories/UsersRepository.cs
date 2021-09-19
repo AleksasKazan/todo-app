@@ -31,6 +31,15 @@ namespace Persistence.Repositories
             });
         }
 
+        public Task<ApiKeyReadModel> GetApiKeyByApiKeyId(Guid id)
+        {
+            var sql = @$"SELECT * FROM {ApiKeysTable} WHERE Id = @Id";
+            return _sqlClient.QuerySingleOrDefaultAsync<ApiKeyReadModel>(sql, new
+            {
+                Id = id
+            });
+        }
+
         public Task<IEnumerable<ApiKeyReadModel>> GetAllApiKeys(Guid id)
         {
             var sql = @$"SELECT * FROM {ApiKeysTable} WHERE UserId = @Id";
@@ -60,6 +69,16 @@ namespace Persistence.Repositories
             });
         }
 
+        public Task<UserReadModel> GetUserByName(string userName)
+        {
+            var sql = @$"SELECT * FROM {UsersTable} WHERE UserName = @UserName";
+
+            return _sqlClient.QuerySingleOrDefaultAsync<UserReadModel>(sql, new
+            {
+                UserName = userName
+            });
+        }
+
         public Task<int> CreateUser(UserReadModel user)
         {
             var sql = @$"INSERT INTO {UsersTable} (Id, UserName, Password, DateCreated)
@@ -77,9 +96,9 @@ namespace Persistence.Repositories
 
         public Task<int> CreateApiKey(ApiKeyReadModel apiKey)
         {
-            var sql = @$"INSERT INTO {ApiKeysTable} (Id, ApiKey, UserId, IsActive, DateCreated)
-                        VALUES(@Id, @ApiKey, @UserId, @IsActive, @DateCreated)
-            ON DUPLICATE KEY UPDATE Id = @Id, ApiKey = @ApiKey, UserId = @UserId, IsActive = @IsActive, DateCreated = @DateCreated";
+            var sql = @$"INSERT INTO {ApiKeysTable} (Id, ApiKey, UserId, IsActive, DateCreated, ExpirationDate)
+                        VALUES(@Id, @ApiKey, @UserId, @IsActive, @DateCreated, @ExpirationDate)
+            ON DUPLICATE KEY UPDATE Id = @Id, ApiKey = @ApiKey, UserId = @UserId, IsActive = @IsActive, DateCreated = @DateCreated, ExpirationDate = @ExpirationDate";
 
             return _sqlClient.ExecuteAsync(sql, new
             {
@@ -87,9 +106,9 @@ namespace Persistence.Repositories
                 apiKey.ApiKey,
                 apiKey.UserId,
                 apiKey.IsActive,
-                apiKey.DateCreated
-
+                apiKey.DateCreated,
+                apiKey.ExpirationDate             
             });
-        }        
+        }
     }
 }

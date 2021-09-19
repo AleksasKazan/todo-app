@@ -38,7 +38,8 @@ namespace TodoApp
                 ApiKey = apiKey.ApiKey,
                 UserId = apiKey.UserId,
                 IsActive = apiKey.IsActive,
-                DateCreated = apiKey.DateCreated
+                DateCreated = apiKey.DateCreated,
+                ExpirationDate = apiKey.ExpirationDate
             };
         }
     }
